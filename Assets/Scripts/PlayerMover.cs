@@ -10,8 +10,11 @@ public class PlayerMover : MonoBehaviour
     [SerializeField] Vibration vibration;
     [SerializeField] GameObject bombManager;
     [SerializeField] GameObject bomb;
-    [SerializeField] Health health; 
+    [SerializeField] Health health;
+    [SerializeField] Canvas canvas; 
+    public bool inBoots = false;
     private Vector2 desiredDirection = Vector2.zero;
+    bool isMoving = true;
     Rigidbody2D rb2D;
     private void OnEnable()
     {
@@ -24,6 +27,7 @@ public class PlayerMover : MonoBehaviour
     private void Start()
     {
         rb2D = GetComponent<Rigidbody2D>();
+        canvas.enabled = false;
     }
 
     void Update()
@@ -42,32 +46,57 @@ public class PlayerMover : MonoBehaviour
         {
 
             RaycastHit2D hit = Physics2D.Raycast(transform.position, desiredDirection, 100f, LayerMask.GetMask("Obstacle"));
-            if (hit.collider != null)
+            if (hit.collider != null && isMoving)
             {
-                transform.position = hit.point - desiredDirection;
+                if (hit.collider.TryGetComponent<Boots>(out var boots)) StartCoroutine(Move(hit.point));
+                else if(hit.collider.TryGetComponent<Lava>(out var lava)) StartCoroutine(Move(hit.point));
+                else StartCoroutine(Move(hit.point- desiredDirection)); 
             }
             desiredDirection = Vector2.zero;
         }
-        if (swipeControls.IsTaping)
+        if (swipeControls.IsTaping && isMoving)
         { 
             swipeControls.IsTaping = false;
 
             StartCoroutine(Explotion());
         }
-
+        if (inBoots)
+        {
+            GetComponent<Animator>().SetBool("Boots", true);
+        }
     }
 
     IEnumerator Explotion()
     {
         bomb.SetActive(true);
         bombManager.transform.position = transform.position;
-        Debug.Log("is TAping");
         yield return new WaitForSeconds(1);
     }
     void Kill()
     {
-        SceneManager.LoadScene(0);
+        isMoving = false;
+        canvas.enabled = true;
     }
 
-
+    public void ReloadScene()
+    {
+        SceneManager.LoadScene(0);
+    }
+    IEnumerator Move(Vector2 endPosition)
+    {
+        Vector2 startPosition = transform.position;
+        
+        while (Vector3.Distance(transform.position, endPosition) > 0.001f)
+        {
+            transform.position = Vector2.MoveTowards(transform.position, endPosition, moveSpeed * Time.deltaTime);
+            yield return null;
+        }
+        
+        //float step = 0.01f * moveSpeed * Time.deltaTime;
+        //for (float i = 0; i < 1; i+=step)
+        //{
+        //    transform.position = Vector2.Lerp(startPosition, endPosition, i);
+        //    yield return null;
+        //}
+    }
 }
