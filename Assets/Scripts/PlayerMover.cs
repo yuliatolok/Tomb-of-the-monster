@@ -7,14 +7,14 @@ public class PlayerMover : MonoBehaviour
 {
     [SerializeField] float moveSpeed = 5f;
     [SerializeField] private Swipe swipeControls;
-    [SerializeField] Vibration vibration;
     [SerializeField] GameObject bombManager;
     [SerializeField] GameObject bomb;
     [SerializeField] Health health;
-    [SerializeField] Canvas canvas; 
+    [SerializeField] Canvas canvas;
     public bool inBoots = false;
     private Vector2 desiredDirection = Vector2.zero;
     bool isMoving = true;
+    bool BombSet = false;
     Rigidbody2D rb2D;
     private void OnEnable()
     {
@@ -49,13 +49,22 @@ public class PlayerMover : MonoBehaviour
             if (hit.collider != null && isMoving)
             {
                 if (hit.collider.TryGetComponent<Boots>(out var boots)) StartCoroutine(Move(hit.point));
-                else if(hit.collider.TryGetComponent<Lava>(out var lava)) StartCoroutine(Move(hit.point));
-                else StartCoroutine(Move(hit.point- desiredDirection)); 
+                else if (hit.collider.TryGetComponent<Lava>(out var lava))
+                {
+                    if (inBoots)
+                    {
+                        lava.GetComponent<BoxCollider2D>().enabled = false;
+                        return;
+                    }
+                    else StartCoroutine(Move(hit.point));
+                }
+                else if (hit.collider.TryGetComponent<Knife>(out var knife)) StartCoroutine(Move(hit.point - 0.7f * desiredDirection));
+                else StartCoroutine(Move(hit.point - 0.7f * desiredDirection));
             }
             desiredDirection = Vector2.zero;
         }
-        if (swipeControls.IsTaping && isMoving)
-        { 
+        if (swipeControls.IsTaping && isMoving && !BombSet)
+        {
             swipeControls.IsTaping = false;
 
             StartCoroutine(Explotion());
@@ -70,7 +79,9 @@ public class PlayerMover : MonoBehaviour
     {
         bomb.SetActive(true);
         bombManager.transform.position = transform.position;
-        yield return new WaitForSeconds(1);
+        BombSet = true;
+        yield return new WaitForSeconds(4);
+        BombSet = false;
     }
     void Kill()
     {
@@ -85,18 +96,11 @@ public class PlayerMover : MonoBehaviour
     IEnumerator Move(Vector2 endPosition)
     {
         Vector2 startPosition = transform.position;
-        
+
         while (Vector3.Distance(transform.position, endPosition) > 0.001f)
         {
             transform.position = Vector2.MoveTowards(transform.position, endPosition, moveSpeed * Time.deltaTime);
             yield return null;
         }
-        
-        //float step = 0.01f * moveSpeed * Time.deltaTime;
-        //for (float i = 0; i < 1; i+=step)
-        //{
-        //    transform.position = Vector2.Lerp(startPosition, endPosition, i);
-        //    yield return null;
-        //}
     }
 }
