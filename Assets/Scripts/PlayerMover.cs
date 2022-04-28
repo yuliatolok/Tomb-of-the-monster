@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerMover : MonoBehaviour
 {
@@ -9,8 +10,17 @@ public class PlayerMover : MonoBehaviour
     [SerializeField] Vibration vibration;
     [SerializeField] GameObject bombManager;
     [SerializeField] GameObject bomb;
+    [SerializeField] Health health; 
     private Vector2 desiredDirection = Vector2.zero;
     Rigidbody2D rb2D;
+    private void OnEnable()
+    {
+        health.OnKilled += Kill;
+    }
+    private void OnDisable()
+    {
+        health.OnKilled -= Kill;
+    }
     private void Start()
     {
         rb2D = GetComponent<Rigidbody2D>();
@@ -54,5 +64,10 @@ public class PlayerMover : MonoBehaviour
         Debug.Log("is TAping");
         yield return new WaitForSeconds(1);
     }
+    void Kill()
+    {
+        SceneManager.LoadScene(0);
+    }
+
 
 }

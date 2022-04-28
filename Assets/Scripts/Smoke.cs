@@ -7,20 +7,11 @@ public class Smoke : MonoBehaviour
 {
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        Debug.Log(collision);
-        Debug.Log(collision.tag);
 
-        if (collision.CompareTag("Explotioning"))
+        if (collision.gameObject.TryGetComponent<Health>(out var heath))
         {
-            if (collision.gameObject.TryGetComponent<Obstacle>(out var obstacle))
-            {
-                obstacle.Explode();
-            }
-         
-        }   
-        if (collision.gameObject.CompareTag("Player"))
-            {
-                SceneManager.LoadScene(0);
-            }
+            heath.Kill();
+        }
+
     }
 }
