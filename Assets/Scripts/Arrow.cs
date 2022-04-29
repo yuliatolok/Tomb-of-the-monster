@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class Arrow : MonoBehaviour
 {
-    [SerializeField] float moveSpeed = 3f;
+    public float moveSpeed = 3f;
     [SerializeField] GameObject destroyed;
+    float moveSpeedBackUp;
     bool isFlying;
     void Update()
     {
@@ -26,7 +27,7 @@ public class Arrow : MonoBehaviour
     }
     public void Shoot()
     {
-        
+
         isFlying = true;
         gameObject.SetActive(true);
     }
@@ -42,7 +43,15 @@ public class Arrow : MonoBehaviour
     private void disableDestroyed()
     {
         destroyed.SetActive(false);
-
+    }
+    public void SetMoveSpeed(float speed)
+    {
+        moveSpeedBackUp = moveSpeed;
+        moveSpeed = speed;
+    }
+    public void ResetMoveSpeed()
+    {
+        moveSpeed = moveSpeedBackUp;
     }
 
 }

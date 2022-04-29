@@ -7,12 +7,16 @@ public class Arbalet : MonoBehaviour
 {
     [SerializeField] Arrow arrow;
     [SerializeField] Transform target;
+    float amountOffBullet = 3f;
+    float amountOffBulletBackup;
+  
    
 
     float angle;
     // Start is called before the first frame update
     void Start()
     {
+        arrow.gameObject.SetActive(true);
         StartCoroutine(Shoot());
     }
 
@@ -36,9 +40,19 @@ public class Arbalet : MonoBehaviour
             arrow.transform.position = transform.position;
             arrow.transform.rotation = transform.rotation;
             arrow.Shoot();
-            yield return new WaitForSeconds(3);
+            yield return new WaitForSeconds(amountOffBullet);
         }
 
     }
-
+    public void SetArrowSpeed(float speed, float amountOffBullet)
+    {
+        amountOffBulletBackup = this.amountOffBullet;
+        this.amountOffBullet = amountOffBullet;
+        arrow.SetMoveSpeed(speed);
+    }
+    public void ResteFireSpeed()
+    {
+        amountOffBullet = amountOffBulletBackup;
+        arrow.ResetMoveSpeed();
+    }
 }

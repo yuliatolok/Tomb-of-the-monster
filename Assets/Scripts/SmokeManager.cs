@@ -11,60 +11,59 @@ public class SmokeManager : MonoBehaviour
     [SerializeField] int smokeSize = 4;
     private int distanceRight = 4, distanceLeft = 4, distanceDown = 4, distanceUp = 4;
     RaycastHit2D hit;
+    int distance;
 
     void OnEnable()
     {
-        hit = Physics2D.Raycast(transform.position, Vector2.down, 200, LayerMask.GetMask("Obstacle"));
-        if (hit.collider != null && hit.collider.CompareTag("Walls")) distanceDown = (int)hit.distance;
-        hit = Physics2D.Raycast(transform.position, Vector2.up, 200, LayerMask.GetMask("Obstacle"));
-        if (hit.collider != null && hit.collider.CompareTag("Walls")) distanceUp = (int)hit.distance;
-        hit = Physics2D.Raycast(transform.position, Vector2.right, 200, LayerMask.GetMask("Obstacle"));
-        if (hit.collider != null && hit.collider.CompareTag("Walls")) distanceRight = (int)hit.distance;
-        hit = Physics2D.Raycast(transform.position, Vector2.left, 200, LayerMask.GetMask("Obstacle"));
-        if (hit.collider != null && hit.collider.CompareTag("Walls")) distanceLeft = (int)hit.distance;
-        Debug.Log(distanceDown + " " + distanceUp + " " + distanceLeft + " " + distanceRight);
+        distanceDown = CheckWalls(Vector2.down);
+        distanceUp = CheckWalls(Vector2.up);
+        distanceRight = CheckWalls(Vector2.right);
+        distanceLeft = CheckWalls(Vector2.left);
+        Debug.Log(distanceDown + " "+ distanceUp + " "+ distanceRight + " "+ distanceLeft);
 
         StartCoroutine(GenerateSmoke());
 
 
     }
 
+    private int CheckWalls(Vector2 direction)
+    {
+        
+        hit = Physics2D.Raycast(transform.position, direction, 200, LayerMask.GetMask("Obstacle"));
+        if (hit.collider != null && hit.collider.CompareTag("Walls")) distance = (int)hit.distance;
+        else if (hit.collider != null) distance = (int)hit.distance + 1;
+        else distance = 4;
+        return distance;
+    }
+
     IEnumerator GenerateSmoke()
     {
-        for (int i = 0; i < distanceDown && i < smokeSize; i++)
-        {
-            smokeParticlesDown[i].SetActive(true);
-        }
-        for (int i = 0; i < distanceUp && i < smokeSize; i++)
-        {
-            smokeParticlesUp[i].SetActive(true);
-        }
-        for (int i = 0; i < distanceRight && i < smokeSize; i++)
-        {
-            smokeParticlesRight[i].SetActive(true);
-        }
-        for (int i = 0; i < distanceLeft && i < smokeSize; i++)
-        {
-            smokeParticlesLeft[i].SetActive(true);
-        }
+        SetSmokeActive(distanceDown, smokeParticlesDown);
+        SetSmokeActive(distanceUp, smokeParticlesUp);
+        SetSmokeActive(distanceRight, smokeParticlesRight);
+        SetSmokeActive(distanceLeft, smokeParticlesLeft);
+        
 
         yield return new WaitForSeconds(1.5f);
-        foreach (var item in smokeParticlesUp)
-        {
-            item.SetActive(false);
-        }
-        foreach (var item in smokeParticlesDown)
-        {
-            item.SetActive(false);
-        }
-        foreach (var item in smokeParticlesRight)
-        {
-            item.SetActive(false);
-        }
-        foreach (var item in smokeParticlesLeft)
+
+        SetSmokeDisactive(smokeParticlesUp);
+        SetSmokeDisactive(smokeParticlesDown);
+        SetSmokeDisactive(smokeParticlesRight);
+        SetSmokeDisactive(smokeParticlesLeft);
+    }
+
+    void SetSmokeDisactive(List<GameObject> gameObjects)
+    {
+        foreach (var item in gameObjects)
         {
             item.SetActive(false);
         }
     }
-
+    void SetSmokeActive(int distance, List<GameObject> gameObjects)
+    {
+        for (int i = 0; i < distance && i < smokeSize; i++)
+        {
+            gameObjects[i].SetActive(true);
+        }
+    }
 }
