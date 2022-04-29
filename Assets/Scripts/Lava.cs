@@ -6,15 +6,16 @@ public class Lava : MonoBehaviour
 {
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        
+
         if (collision.CompareTag("Player"))
         {
-            
+
             PlayerMover player = collision.GetComponent<PlayerMover>();
             if (!player)
                 return;
-            if (!player.inBoots)
-            { 
+
+            if (!player.InBoots)
+            {
                 collision.GetComponent<Health>().Kill();
             }
         }

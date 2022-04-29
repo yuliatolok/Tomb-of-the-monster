@@ -19,7 +19,6 @@ public class SmokeManager : MonoBehaviour
         distanceUp = CheckWalls(Vector2.up);
         distanceRight = CheckWalls(Vector2.right);
         distanceLeft = CheckWalls(Vector2.left);
-        Debug.Log(distanceDown + " "+ distanceUp + " "+ distanceRight + " "+ distanceLeft);
 
         StartCoroutine(GenerateSmoke());
 

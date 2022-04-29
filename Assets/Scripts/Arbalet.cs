@@ -9,18 +9,14 @@ public class Arbalet : MonoBehaviour
     [SerializeField] Transform target;
     float amountOffBullet = 3f;
     float amountOffBulletBackup;
-  
-   
 
     float angle;
-    // Start is called before the first frame update
     void Start()
     {
         arrow.gameObject.SetActive(true);
         StartCoroutine(Shoot());
     }
 
-    // Update is called once per frame
     void Update()
     {
         AimWeapon();

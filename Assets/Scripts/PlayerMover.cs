@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -11,67 +10,42 @@ public class PlayerMover : MonoBehaviour
     [SerializeField] GameObject bomb;
     [SerializeField] Health health;
     [SerializeField] Canvas canvas;
-    public bool inBoots = false;
+
+    private bool inBoots = false;
     public bool hasKey;
-    private Vector2 desiredDirection = Vector2.zero;
     public bool isMoving = true;
     bool BombSet = false;
-    Rigidbody2D rb2D;
+    public bool InBoots => inBoots;
+
     private void OnEnable()
     {
         health.OnKilled += Kill;
+        swipeControls.OnSwipe += Move;
+        swipeControls.OnClick += SetBomb;
     }
     private void OnDisable()
     {
         health.OnKilled -= Kill;
+        swipeControls.OnSwipe -= Move;
+        swipeControls.OnClick -= SetBomb;
     }
     private void Start()
     {
-        rb2D = GetComponent<Rigidbody2D>();
         canvas.enabled = false;
     }
 
-    void Update()
+    public void PutBootsOn()
     {
-
-        if (swipeControls.SwipeLeft)
-            desiredDirection = Vector2.left;
-        if (swipeControls.SwipeRight)
-            desiredDirection = Vector2.right;
-        if (swipeControls.SwipeUp)
-            desiredDirection = Vector2.up;
-        if (swipeControls.SwipeDown)
-            desiredDirection = Vector2.down;
-
-        if (desiredDirection != Vector2.zero)
-        {
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, desiredDirection, 100f, LayerMask.GetMask("Obstacle"));
-            if (hit.collider != null && isMoving)
-            {
-                //if (hit.collider.TryGetComponent<Boots>(out var boots)) return;
-                if (hit.collider.TryGetComponent<Lava>(out var lava))
-                {
-                    if (inBoots)
-                    {
-                        lava.GetComponent<BoxCollider2D>().enabled = false;
-                        return;
-                    }
-                    else StartCoroutine(Move(hit.point));
-                }
-                else if (hit.collider.TryGetComponent<Knife>(out var knife)) StartCoroutine(Move(hit.point - desiredDirection));
-                else StartCoroutine(Move(hit.point - 0.5f * desiredDirection));
-            }
-            desiredDirection = Vector2.zero;
-        }
-        if (swipeControls.IsTaping && isMoving && !BombSet)
+        inBoots = true;
+        GetComponent<Animator>().SetBool("Boots", true);
+    }
+    private void SetBomb()
+    {
+        if (isMoving && !BombSet)
         {
             swipeControls.IsTaping = false;
 
             StartCoroutine(Explotion());
-        }
-        if (inBoots)
-        {
-            GetComponent<Animator>().SetBool("Boots", true);
         }
     }
 
@@ -83,7 +57,8 @@ public class PlayerMover : MonoBehaviour
         yield return new WaitForSeconds(4);
         BombSet = false;
     }
-    void Kill()
+
+    private void Kill()
     {
         isMoving = false;
         canvas.enabled = true;
@@ -93,16 +68,41 @@ public class PlayerMover : MonoBehaviour
     {
         SceneManager.LoadScene(0);
     }
-    IEnumerator Move(Vector2 endPosition)
+
+    private void Move(Vector2 direction)
     {
-        Vector2 startPosition = transform.position;
+        if (direction != Vector2.zero)
+        {
+            RaycastHit2D hit =
+                Physics2D.Raycast(transform.position, direction, 100f, LayerMask.GetMask("Obstacle"));
+            if (hit.collider != null && isMoving)
+            {
+                if (hit.collider.TryGetComponent<Lava>(out var lava))
+                {
+                    if (inBoots)
+                    {
+                        lava.GetComponent<BoxCollider2D>().enabled = false;
+                        return;
+                    }
 
+                    StartCoroutine(Strafe(hit.point));
+                }
+                else if (hit.collider.TryGetComponent<Knife>(out var knife))
+                    StartCoroutine(Strafe(hit.point - direction));
+                else StartCoroutine(Strafe(hit.point - 0.5f * direction));
+            }
+        }
+    }
 
+    private IEnumerator Strafe(Vector2 endPosition)
+    {
         while (Vector3.Distance(transform.position, endPosition) > 0.001f)
         {
             transform.position = Vector2.MoveTowards(transform.position, endPosition, moveSpeed * Time.deltaTime);
             yield return null;
         }
+
+        Vibrator.Vibrate(50);
     }
 
     public void StopTaping()
@@ -110,7 +110,7 @@ public class PlayerMover : MonoBehaviour
         StartCoroutine(StopSettingBombs());
     }
 
-    IEnumerator StopSettingBombs()
+    private IEnumerator StopSettingBombs()
     {
         BombSet = true;
         yield return new WaitForSeconds(1);

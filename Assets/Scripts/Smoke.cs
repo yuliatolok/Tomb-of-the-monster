@@ -7,7 +7,6 @@ public class Smoke : MonoBehaviour
 {
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        Debug.Log(collision);
         if (collision.gameObject.TryGetComponent<Health>(out var heath))
         {
             heath.Kill();

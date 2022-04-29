@@ -1,62 +1,46 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class Pointer : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+public class Pointer : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
-    private bool tap, swipeLeft, swipeRight, swipeUp, swipeDown;
-    private bool isDraging = false, isTaping = false;
+    public bool IsTaping;
+    public Vector2 GetSwipe => swipe;
     private Vector2 startTouch, swipeDelta, swipeLeight;
+    private Vector2 swipe;
 
+    public event Action<Vector2> OnSwipe;
+    public event Action OnClick;
     public void OnBeginDrag(PointerEventData eventData)
     {
-        
-        tap = true;
-        isDraging = true;
-        startTouch = eventData.position;
-        swipeDelta = Vector2.zero;
-    }
 
-    public void OnDrag(PointerEventData eventData)
-    {
-        swipeDelta = eventData.position - startTouch;
-        swipeLeight = swipeDelta;
-        
-        //Debug.Log("swipeLeight is " + swipeLeight.magnitude);
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        isDraging = false;
-       
-        if (swipeLeight.magnitude < 250)
+        swipeDelta = eventData.position - startTouch;
+        swipeLeight = swipeDelta;
+        if (swipeLeight.magnitude < 50)
         {
             IsTaping = true;
-        }        
-        Reset();
-    }
+        }
 
-    void Update()
-    {
-        tap = swipeLeft = swipeRight = swipeUp = swipeDown = false;
-
-        if (swipeDelta.magnitude > 250)
+        if (swipeDelta.magnitude > 70)
         {
             float x = swipeDelta.x;
             float y = swipeDelta.y;
 
             if (Mathf.Abs(x) > Mathf.Abs(y))
             {
-                if (x < 500) swipeLeft = true;
-                else swipeRight = true;
+                if (x < 0) swipe = Vector2.left;
+                else swipe = Vector2.right;
             }
             else
             {
-                if (y < 500) swipeDown = true;
-                else swipeUp = true;
+                if (y < 0) swipe = Vector2.down;
+                else swipe = Vector2.up;
             }
-            Debug.Log(swipeLeft + " "+ swipeDown+ " "+ swipeRight + " " + swipeUp);
+            OnSwipe?.Invoke(swipe);
             Reset();
 
         }
@@ -64,17 +48,46 @@ public class Pointer : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragH
     private void Reset()
     {
         startTouch = swipeDelta = Vector2.zero;
-        isDraging = false;
         IsTaping = false;
-        isTaping = false;
     }
 
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        startTouch = eventData.position;
+        swipeDelta = Vector2.zero;
+    }
 
+    public void OnPointerUp(PointerEventData eventData)
+    {
+        swipeDelta = eventData.position - startTouch;
+        swipeLeight = swipeDelta;
+        if (swipeLeight.magnitude < 50)
+        {
+            IsTaping = true;
+        }
 
-    public Vector2 SwipeDelta { get { return swipeDelta; } }
-    public bool SwipeLeft { get { return swipeLeft; } }
-    public bool SwipeRight { get { return swipeRight; } }
-    public bool SwipeUp { get { return swipeUp; } }
-    public bool SwipeDown { get { return swipeDown; } }
-    public bool IsTaping;
+        if (swipeDelta.magnitude > 70)
+        {
+            float x = swipeDelta.x;
+            float y = swipeDelta.y;
+
+            if (Mathf.Abs(x) > Mathf.Abs(y))
+            {
+                if (x < 0) swipe = Vector2.left;
+                else swipe = Vector2.right;
+            }
+            else
+            {
+                if (y < 0) swipe = Vector2.down;
+                else swipe = Vector2.up;
+            }
+            OnSwipe?.Invoke(swipe);
+
+        }
+        else
+        {
+            OnClick?.Invoke();
+        }
+        Reset();
+    }
 }

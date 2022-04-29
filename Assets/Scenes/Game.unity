@@ -1930,7 +1930,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1260531176
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7700,6 +7700,10 @@ PrefabInstance:
       propertyPath: bombManager
       value: 
       objectReference: {fileID: 180472785}
+    - target: {fileID: 2136945667, guid: 6850be57b5d7b8a4ba47d3238ae7538d, type: 3}
+      propertyPath: swipeControls
+      value: 
+      objectReference: {fileID: 504254637}
     - target: {fileID: 1201178527424797438, guid: 6850be57b5d7b8a4ba47d3238ae7538d, type: 3}
       propertyPath: m_Name
       value: Player
