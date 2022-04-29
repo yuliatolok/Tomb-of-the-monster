@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 public class PlayerMover : MonoBehaviour
 {
     [SerializeField] float moveSpeed = 5f;
-    [SerializeField] private Swipe swipeControls;
+    [SerializeField] private Pointer swipeControls;
     [SerializeField] GameObject bombManager;
     [SerializeField] GameObject bomb;
     [SerializeField] Health health;

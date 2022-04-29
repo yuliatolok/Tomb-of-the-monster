@@ -20,17 +20,17 @@ public class Pointer : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragH
 
     public void OnDrag(PointerEventData eventData)
     {
-        
         swipeDelta = eventData.position - startTouch;
         swipeLeight = swipeDelta;
-        Debug.Log("swipeLeight is " + swipeLeight.magnitude);
+        
+        //Debug.Log("swipeLeight is " + swipeLeight.magnitude);
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
         isDraging = false;
        
-        if (swipeLeight.magnitude < 350)
+        if (swipeLeight.magnitude < 250)
         {
             IsTaping = true;
         }        
@@ -41,7 +41,7 @@ public class Pointer : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragH
     {
         tap = swipeLeft = swipeRight = swipeUp = swipeDown = false;
 
-        if (swipeDelta.magnitude > 350)
+        if (swipeDelta.magnitude > 250)
         {
             float x = swipeDelta.x;
             float y = swipeDelta.y;
